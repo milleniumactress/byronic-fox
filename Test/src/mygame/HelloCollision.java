@@ -184,54 +184,6 @@ public class HelloCollision extends SimpleApplication
      * command is what lets a physics-controlled player walk. We also make sure
      * here that the camera moves with player.
      */
-    @Override
-    public void simpleUpdate(float tpf) {
-//        camDir.set(cam.getDirection()).multLocal(0.6f);
-//        camLeft.set(cam.getLeft()).multLocal(0.4f);
-//
-//        walkDirection.set(0, 0, 0);
-        if (left) {
-//            fox.setLocalScale(0.05f);
-//            //player.setWalkDirection(walkDirection.addLocal(camLeft));
-//            Vector3f v = fox.getLocalTranslation();
-//            fox.setLocalTranslation(v.x + 0.1f * speed, v.y, v.z);
-            direction.crossLocal(Vector3f.UNIT_Y).multLocal(-5 * tpf);
-            foxNode.move(direction);
-
-        }
-        if (right) {
-            fox.setLocalScale(0.05f);
-//            //player.setWalkDirection(walkDirection.addLocal(camLeft.negate()));
-//            //fox.setLocalTranslation(walkDirection.addLocal(camLeft.negate()));
-//            Vector3f v = fox.getLocalTranslation();
-//            fox.setLocalTranslation(v.x - 0.1f * speed, v.y, v.z);
-            direction.crossLocal(Vector3f.UNIT_Y).multLocal(5 * tpf);
-            foxNode.move(direction);
-        }
-        if (up) {
-            fox.setLocalScale(0.05f);
-//            //player.setWalkDirection(walkDirection.addLocal(camDir));
-//            //fox.setLocalTranslation(walkDirection.addLocal(camDir));
-//            Vector3f v = fox.getLocalTranslation();
-//            fox.setLocalTranslation(v.x, v.y + 0.1f * speed, v.z);
-            direction.multLocal(5 * tpf);
-            foxNode.move(direction);
-        }
-        if (down) {
-            fox.setLocalScale(0.05f);
-            //player.setWalkDirection(walkDirection.addLocal(camDir.negate()));
-            //fox.setLocalTranslation(walkDirection.addLocal(camDir.negate()));
-//            Vector3f v = fox.getLocalTranslation();
-//            fox.setLocalTranslation(v.x, v.y - 0.1f * speed, v.z);
-            direction.multLocal(-5 * tpf);
-            foxNode.move(direction);
-        }
-        fox.setLocalScale(0.05f);
-//        rootNode.attachChild(fox);
-//        //player.setWalkDirection(walkDirection);
-//        cam.setLocation(player.getPhysicsLocation());
-        //fox.move(tpf, tpf, 0.5f);
-    }
 
     @Override
     public void onAnalog(String name, float value, float tpf) {

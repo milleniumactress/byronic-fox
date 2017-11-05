@@ -11,13 +11,16 @@ import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.CameraNode;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.control.CameraControl;
 import com.jme3.scene.plugins.fbx.mesh.FbxMesh;
 
 /**
@@ -27,10 +30,13 @@ import com.jme3.scene.plugins.fbx.mesh.FbxMesh;
  * @author normen, with edits by Zathras
  */
 public class HelloCollision extends SimpleApplication
-        implements ActionListener {// customize the navigational input later
+        implements AnalogListener, ActionListener {// customize the navigational input later
 
     private Spatial sceneModel;//ogreXML model of town
     private Spatial fox;
+    private Node foxNode;
+    private CameraNode camNode;
+    private Vector3f direction = new Vector3f();
     private BulletAppState bulletAppState;// gives access to physical feature
     private RigidBodyControl landscape;//to make model solid
     private RigidBodyControl foxBody;//
@@ -76,13 +82,14 @@ public class HelloCollision extends SimpleApplication
         landscape = new RigidBodyControl(sceneShape, 0);
         sceneModel.addControl(landscape);
 
+        foxNode = new Node("foxNode");
         fox = assetManager.loadModel("Models/animations/animations.j3o");
         fox.setLocalScale(0.05f);
-        
+
         CollisionShape foxShape = CollisionShapeFactory.createMeshShape(fox);
-        foxBody=new RigidBodyControl(foxShape,0);
+        foxBody = new RigidBodyControl(foxShape, 0);
         fox.addControl(foxBody);
-        
+
         // We set up collision detection for the player by creating
         // a capsule collision shape and a CharacterControl.
         // The CharacterControl offers extra settings for
@@ -96,12 +103,29 @@ public class HelloCollision extends SimpleApplication
         player.setGravity(30);
         player.setPhysicsLocation(new Vector3f(0, 10, 0));
 
+        //creating the camera Node
+        camNode = new CameraNode("CamNode", cam);
+        //Setting the direction to Spatial to camera, this means the camera will copy the movements of the Node
+        camNode.setControlDir(CameraControl.ControlDirection.SpatialToCamera);
+        //attaching the camNode to the foxNode
+        foxNode.attachChild(camNode);
+        //setting the local translation of the cam node to move it away from the teanNode a bit
+        camNode.setLocalTranslation(new Vector3f(-10, 0, 0));
+        //setting the camNode to look at the foxNode
+        camNode.lookAt(foxNode.getLocalTranslation(), Vector3f.UNIT_Y);
+
+        //disable the default 1st-person flyCam (don't forget this!!)
+        flyCam.setEnabled(false);
+
         // We attach the scene and the player to the rootnode and the physics space,
         // to make them appear in the game world.
+        foxNode.attachChild(fox);
+        rootNode.attachChild(foxNode);
         rootNode.attachChild(sceneModel);
         bulletAppState.getPhysicsSpace().add(fox);
         bulletAppState.getPhysicsSpace().add(landscape);
         bulletAppState.getPhysicsSpace().add(player);
+
     }
 
     private void setUpLight() {
@@ -162,42 +186,73 @@ public class HelloCollision extends SimpleApplication
      */
     @Override
     public void simpleUpdate(float tpf) {
-        camDir.set(cam.getDirection()).multLocal(0.6f);
-        camLeft.set(cam.getLeft()).multLocal(0.4f);
-
-        walkDirection.set(0, 0, 0);
+//        camDir.set(cam.getDirection()).multLocal(0.6f);
+//        camLeft.set(cam.getLeft()).multLocal(0.4f);
+//
+//        walkDirection.set(0, 0, 0);
         if (left) {
-            fox.setLocalScale(0.05f);
-            //player.setWalkDirection(walkDirection.addLocal(camLeft));
-            Vector3f v = fox.getLocalTranslation();
-            fox.setLocalTranslation(v.x + 0.1f * speed, v.y, v.z);
+//            fox.setLocalScale(0.05f);
+//            //player.setWalkDirection(walkDirection.addLocal(camLeft));
+//            Vector3f v = fox.getLocalTranslation();
+//            fox.setLocalTranslation(v.x + 0.1f * speed, v.y, v.z);
+            direction.crossLocal(Vector3f.UNIT_Y).multLocal(-5 * tpf);
+            foxNode.move(direction);
+
         }
         if (right) {
             fox.setLocalScale(0.05f);
-            //player.setWalkDirection(walkDirection.addLocal(camLeft.negate()));
-            //fox.setLocalTranslation(walkDirection.addLocal(camLeft.negate()));
-            Vector3f v = fox.getLocalTranslation();
-            fox.setLocalTranslation(v.x - 0.1f * speed, v.y, v.z);
+//            //player.setWalkDirection(walkDirection.addLocal(camLeft.negate()));
+//            //fox.setLocalTranslation(walkDirection.addLocal(camLeft.negate()));
+//            Vector3f v = fox.getLocalTranslation();
+//            fox.setLocalTranslation(v.x - 0.1f * speed, v.y, v.z);
+            direction.crossLocal(Vector3f.UNIT_Y).multLocal(5 * tpf);
+            foxNode.move(direction);
         }
         if (up) {
             fox.setLocalScale(0.05f);
-            //player.setWalkDirection(walkDirection.addLocal(camDir));
-            //fox.setLocalTranslation(walkDirection.addLocal(camDir));
-            Vector3f v = fox.getLocalTranslation();
-            fox.setLocalTranslation(v.x, v.y + 0.1f * speed, v.z);
+//            //player.setWalkDirection(walkDirection.addLocal(camDir));
+//            //fox.setLocalTranslation(walkDirection.addLocal(camDir));
+//            Vector3f v = fox.getLocalTranslation();
+//            fox.setLocalTranslation(v.x, v.y + 0.1f * speed, v.z);
+            direction.multLocal(5 * tpf);
+            foxNode.move(direction);
         }
         if (down) {
             fox.setLocalScale(0.05f);
             //player.setWalkDirection(walkDirection.addLocal(camDir.negate()));
             //fox.setLocalTranslation(walkDirection.addLocal(camDir.negate()));
-            Vector3f v = fox.getLocalTranslation();
-            fox.setLocalTranslation(v.x, v.y - 0.1f * speed, v.z);
+//            Vector3f v = fox.getLocalTranslation();
+//            fox.setLocalTranslation(v.x, v.y - 0.1f * speed, v.z);
+            direction.multLocal(-5 * tpf);
+            foxNode.move(direction);
         }
         fox.setLocalScale(0.05f);
-        rootNode.attachChild(fox);
-        //player.setWalkDirection(walkDirection);
-        cam.setLocation(player.getPhysicsLocation());
+//        rootNode.attachChild(fox);
+//        //player.setWalkDirection(walkDirection);
+//        cam.setLocation(player.getPhysicsLocation());
         //fox.move(tpf, tpf, 0.5f);
+    }
+
+    @Override
+    public void onAnalog(String name, float value, float tpf) {
+        direction.set(cam.getDirection()).normalizeLocal();
+        if (name.equals("Up")) {
+            direction.multLocal(30 * tpf);
+            foxNode.move(direction);
+        }
+        if (name.equals("Down")) {
+            direction.multLocal(-30 * tpf);
+            foxNode.move(direction);
+        }
+        if (name.equals("Right")) {
+            direction.crossLocal(Vector3f.UNIT_Y).multLocal(30 * tpf);
+            foxNode.move(direction);
+        }
+        if (name.equals("Left")) {
+            direction.crossLocal(Vector3f.UNIT_Y).multLocal(-30 * tpf);
+            foxNode.move(direction);
+        }
+
     }
 
 }

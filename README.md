@@ -1,4 +1,4 @@
-# manic-pixie-dream-girl
+# Byronic-fox
 A side-scrolling game in which you run and jump over obstacles
 
 
